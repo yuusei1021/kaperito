@@ -8,13 +8,13 @@
 #define	GAME_SIZE_X		600	//ゲームエリアの横サイズ
 #define	GAME_SIZE_Y		500	//ゲームエリアの縦サイズ
 
-//自機
-#define	PLAYER_SIZE_X	48	//自機画像の横サイズ
-#define	PLAYER_SIZE_Y	48	//自機画像の縦サイズ
 
 //敵
 #define	ENEMY_SIZE_X	32	//敵画像の横サイズ
 #define	ENEMY_SIZE_Y	32	//敵画像の縦サイズ
+
+//背景
+#define SCROOL_SPEED 2  //背景のスクロールスピード
 
 //プロトタイプ宣言
 //----------------------------------
@@ -24,9 +24,3 @@ void GameMain(void);
 
 void GameMainDraw(void);
 
-//基幹関数
-bool SystemInit(void);
-
-void GameMain(void);
-
-void GameMainDraw(void);

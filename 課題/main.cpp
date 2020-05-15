@@ -6,21 +6,19 @@
 //
 /*--------1---------2---------3---------4---------5---------6---------7-------*/
 #include "DxLib.h"		//Dxlibライブラリを使用する
-
-//定数
-//----------------------------------
-#define SCREEN_SIZE_X 600
-#define SCREEN_SIZE_Y 500
-
+#include "main.h"
+#include "player.h"
+#include "Shot.h"
 //変数
 //----------------------------------
 int gameCounter;
-int playerImage;				//自機の画像ID
-int playerPosX;					//自機のX座標
-int playerPosY;					//自機のY座標
+
+
 
 int enemyImage;
 int haikeiImage;
+
+
 
 //構造体定義
 struct FILE_DATA {
@@ -34,14 +32,6 @@ struct FILE_DATA fileData;
 
 //プロトタイプ宣言
 //----------------------------------
-bool SystemInit(void);
-void GameMain(void);
-void GameMainDraw(void);
-
-//基幹関数
-bool SystemInit(void);
-void GameMain(void);
-void GameMainDraw(void);
 
 
 
@@ -54,6 +44,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return -1;
 	}
 
+
+
+
+
+
+
+
 	// --------ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
@@ -61,10 +58,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		GameMain();
 
+
+
 		gameCounter++;
 		ScreenFlip();		//裏画面を表画面に瞬間コピー
 	}
 	
+
+
+
+
+
 
 	DxLib_End();			// DXライブラリの終了処理
 	return 0;				//このプログラムの終了
@@ -75,7 +79,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 bool SystemInit(void)
 {
 	// ----------システム処理
-	SetWindowText("TestProject");
+	SetWindowText("カペリート");
 	//システム処理
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 16);
 	ChangeWindowMode(true);							//true:window false:フルスクリーン
@@ -93,12 +97,12 @@ bool SystemInit(void)
 	////ファイル用データ初期化
 	//fileData.data1 = 1000;
 	//fileData.hiscore = 5000;
-
-
+	PlayerSystemInit();
+	ShotSystemInit();
 	//背景
 	haikeiImage = LoadGraph("image/haikei.png");
 	//自機
-	playerImage = LoadGraph("image/player.png");
+	
 
 	enemyImage = LoadGraph("image/enemy.png");
 	return true;
@@ -116,8 +120,12 @@ void GameMain(void)
 
 	if ((CheckHitKey(KEY_INPUT_S)))   SaveData();
 	if ((CheckHitKey(KEY_INPUT_L)))   LoadData();*/
-
+	PlayerConttrol();
+	ShotConttrol();
 	GameMainDraw();
+	PlayerDraw();
+	shotDraw();
+
 }
 
 
@@ -126,8 +134,8 @@ void GameMain(void)
 void GameMainDraw(void)
 {
 	DrawGraph(0, 0, haikeiImage, true);
+	
 
-	DrawGraph(0, 450, playerImage, true);
 
 	DrawGraph(0, 0, enemyImage, true);
 

@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #define SHOT_SIZE_X     10 //弾の横サイズ
 #define SHOT_SIZE_Y    10 //弾の縦サイズ

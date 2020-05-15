@@ -11,8 +11,7 @@ int shotFlag;
 void ShotSystemInit(void)
 {
 	shotImage = LoadGraph("image/Shot.png");
-	shotPosX;
-	shotPosY = 0;
+
 	shotSpeed = 5;
 	shotFlag = false;
 }
@@ -28,12 +27,17 @@ void ShotConttrol(void)
 
 
 	}
+
+
+
+
+
+
 }
 void shotDraw(void)
 {
-	DrawGraph(shotPosX, shotPosY, shotImage, true);
+	if (shotFlag == true)
+	{
+		DrawGraph(shotPosX, shotPosY, shotImage, true);
+	}
 }
-
-
-
-

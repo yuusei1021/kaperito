@@ -2,73 +2,110 @@
 //
 //   testproject = main.cpp
 //
-// 
+//   
 //
 /*--------1---------2---------3---------4---------5---------6---------7-------*/
 #include "DxLib.h"		//Dxlibライブラリを使用する
 #include "main.h"
+#include "keycheck.h"
+#include "effect.h"
 #include "player.h"
 #include "Shot.h"
+SCN_ID scnID;	//ｹﾞｰﾑの状況移管理用
+SCN_ID ScnID_Old;//ｹﾞｰﾑの状態管理用
+
+
 //変数
 //----------------------------------
 int gameCounter;
+int haikeiImage;
+int titleImage;
+int overImage;
 
+int haikeiPosX;
+int haikeiPosY;
+int haikeiPosY1;
+int haikeiPosY2;
 
 
 int enemyImage;
-int haikeiImage;
 
 
 
-//構造体定義
-struct FILE_DATA {
-	int data1;
-	int hiscore;
-};
-
-//ファイル情報定義
-char filename [] = "data.dat";
-struct FILE_DATA fileData;
-
-//プロトタイプ宣言
-//----------------------------------
-
-
+//ファイル操作関数
+//bool SaveData(void);
+//bool LoadData(void);
 
 // ========= WinMain関数
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	// システムの初期化
-	if (SystemInit() == false)
+	if (!SystemInit())
 	{
-		return -1;
+		return 0;
 	}
 
-
-
-
-
-
-
+	ClsDrawScreen(); // 画面消去
 
 	// --------ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
-		ClsDrawScreen();	//画面消去
+		
+		KeyCheck();
 
-		GameMain();
+		ClsDrawScreen(); // 画面消去
 
+		switch (scnID)
+		{
+		case SCN_ID_TITLE:
+			if (fadeIn)
+			{
+				if (!FadeInScreen(5)) {} // フェードインが終わった後の処理を書く
+			}
+			if (fadeOut)
+			{
+				if (!FadeOutScreen(5))
+				{// フェードアウトが終わった後の処理を書く
+					fadeIn = true;
+					scnID = SCN_ID_GAME;
+				}
+			}
+			TitleScene();
+			break;
+		case SCN_ID_GAME:
+			if (fadeIn)
+			{
+				if (!FadeInScreen(5)) {} // フェードインが終わった後の処理を書く
+			}
+			if (fadeOut)
+			{
+				if (!FadeOutScreen(5))
+				{// フェードアウトが終わった後の処理を書く
+					fadeIn = true;
+					scnID = SCN_ID_GAMEOVER;
+				}
+			}
+			GameScene();
+			break;
+		case SCN_ID_GAMEOVER:
+			if (fadeIn)
+			{
+				if (!FadeInScreen(5)) {} // フェードインが終わった後の処理を書く
+			}
+			if (fadeOut)
+			{
+				if (!FadeOutScreen(5))
+				{// フェードアウトが終わった後の処理を書く
+					fadeIn = true;
+					scnID = SCN_ID_TITLE;
+				}
+			}
+			GameOverScene();
+			break;
+		default:
+			break;
+		}
 
-
-		gameCounter++;
-		ScreenFlip();		//裏画面を表画面に瞬間コピー
 	}
-	
-
-
-
-
-
 
 	DxLib_End();			// DXライブラリの終了処理
 	return 0;				//このプログラムの終了
@@ -78,6 +115,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 // システムの初期化
 bool SystemInit(void)
 {
+	bool rtnFlag = true;
 	// ----------システム処理
 	SetWindowText("カペリート");
 	//システム処理
@@ -89,56 +127,180 @@ bool SystemInit(void)
 	}
 	SetDrawScreen(DX_SCREEN_BACK);					//ひとまずバックバッファに描画
 
+	haikeiPosY1 = 0;		//背景１のY座標
+	haikeiPosY2 = -BG_SIZE_Y;		//背景２Y座標
+	PlayerSystemInit();
+	KeyInit();
+
 	// ------グラフィックの登録　---------
+	//ﾀｲﾄﾙ画面
+	if ((titleImage = LoadGraph("image/title.png")) == -1)
+	{
+		rtnFlag = false;
+	}
+	//ゲームオーバー
+	if ((overImage = LoadGraph("image/over.png")) == -1)
+	{
+		rtnFlag = false;
+	}
+	//背景
+	if ((haikeiImage = LoadGraph("image/haikei.png")) == -1)
+	{
+		rtnFlag = false;
+	}
+	
+	
+	
+	//敵
+	enemyImage = LoadGraph("image/enemy.png");
+
 
 	// ------変数初期化　-----------
 	gameCounter = 0;
 
-	////ファイル用データ初期化
-	//fileData.data1 = 1000;
+
+	//ファイル用データ初期化
+	///fileData.data1 = 1000;
 	//fileData.hiscore = 5000;
-	PlayerSystemInit();
+
 	ShotSystemInit();
-	//背景
-	haikeiImage = LoadGraph("image/haikei.png");
-	//自機
-	enemyImage = LoadGraph("image/enemy.png");
+	EffectInit();			// エフェクト用初期化処理
+
+	return rtnFlag;
+}
+
+//ﾀｲﾄﾙｼｰﾝ用初期化
+bool TitleInit(void)
+{
+	bool rtnFlag = true;	//返り値用変数
+
+	scnID = SCN_ID_TITLE;
+
+	return rtnFlag;
+}
+
+//ﾀｲﾄﾙ画面処理
+void TitleScene(void)
+{
 	
 
-
-	return true;
+	if (keyDownTrigger[KEY_ID_SPACE])
+	{
+		fadeOut = true;
+		//scnID = SCN_ID_GAME;
+	}
+	TitleDraw();
 
 }
 
-//---------------------------------------------
-// プレイ中処理
-void GameMain(void)
+void TitleDraw(void)
 {
-	/*if ((CheckHitKey(KEY_INPUT_UP)))   fileData. hiscore += 100;
-	if ((CheckHitKey(KEY_INPUT_DOWN)))   fileData. hiscore -= 100;
-	if ((CheckHitKey(KEY_INPUT_LEFT)))   fileData. data1 -= 100;
-	if ((CheckHitKey(KEY_INPUT_RIGHT)))   fileData. data1 += 100;
+	ClsDrawScreen();	//画面消去
 
-	if ((CheckHitKey(KEY_INPUT_S)))   SaveData();
-	if ((CheckHitKey(KEY_INPUT_L)))   LoadData();*/
+	//ﾀｲﾄﾙﾛｺﾞ表示
+	DrawGraph(0, 0, titleImage, true);
+	
+	ScreenFlip();	//バックバッファとフロントﾊﾞｯﾌｧを入れ替える
+}
+
+//ｹﾞｰﾑｼｰﾝ用の初期化
+bool GameInit(void)
+{
+	bool rtnFlag = true;	// 返り値用変数
+
+	scnID = SCN_ID_GAME;
+
+	return rtnFlag;
+}
+
+void GameScene(void)
+{
+	//PlayerDraw();
+	GameDraw();
 	PlayerConttrol();
 	ShotConttrol();
-	GameMainDraw();
-	PlayerDraw();
-	shotDraw();
-
+	if (keyDownTrigger[KEY_ID_SPACE])
+	{
+		//scnID = SCN_ID_GAMEOVER;
+		fadeOut = true;
+	}
+	
 }
-
 
 //---------------------------------------------
 // プレイ中の描画
-void GameMainDraw(void)
+void GameDraw(void)
 {
-	DrawGraph(0, 0, haikeiImage, true);
+	ClsDrawScreen();	//裏になっているﾊﾞｯﾌｧをｸﾘｱする。
+
 	
+	//背景描画
+	//背景の描画
+	DrawGraph(0, haikeiPosY1, haikeiImage, false);
+	DrawGraph(0, haikeiPosY2, haikeiImage, false);
+
+	haikeiPosY1 += 2;
+	if (haikeiPosY1 >= BG_SIZE_Y)
+	{
+		haikeiPosY1 = -BG_SIZE_Y;
+	}
 
 
-	DrawGraph(0, 0, enemyImage, true);
+	haikeiPosY2 += 2;
+	if (haikeiPosY2 >= BG_SIZE_Y)
+	{
+		haikeiPosY2 = -BG_SIZE_Y;
+	}
+	
+	//haikeiPosY += SCROLL_SPEED;
 
-	//DrawFormatString(0, 0, 0xFFFFFF, "GameMain : %d", gameCounter);
+	PlayerDraw();
+	shotDraw();
+	/*DrawGraph(0, 450, playerImage, true);
+
+	DrawGraph(150, 450, enemyImage, true);*/
+
+	ScreenFlip();		// 裏画面と表画面を入れ替える
 }
+
+//ｹﾞｰﾑｵｰﾊﾞｰｼｰﾝの初期化
+bool GameOverInit(void)
+{
+	int rtnFlag = true;	//返り値変数
+
+	scnID = SCN_ID_GAMEOVER;
+
+	return rtnFlag;
+}
+
+void GameOverScene(void)
+{
+	
+	GameOverDraw();
+
+	
+	
+	if (keyDownTrigger[KEY_ID_SPACE])
+	{
+		
+		fadeOut = true;
+		//scnID = SCN_ID_TITLE;
+		
+	}
+	
+}
+
+void GameOverDraw(void)
+{
+	ClsDrawScreen();	//裏になっているﾊﾞｯﾌｧをｸﾘｱする。
+
+	DrawGraph(0, 0, overImage, true);
+
+	ScreenFlip();
+}
+
+
+
+
+
+

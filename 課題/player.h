@@ -7,3 +7,8 @@
 void PlayerSystemInit(void);
 void PlayerConttrol(void);
 void PlayerDraw(void);
+//ïœêî
+extern int shotPosX;
+extern int shotPosY;
+
+extern int shotFlag;

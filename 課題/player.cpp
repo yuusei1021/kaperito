@@ -18,6 +18,7 @@ void PlayerSystemInit(void)
 }
 void PlayerConttrol(void)
 {
+	//à⁄ìÆ
 	if (CheckHitKey(KEY_INPUT_LEFT))
 	{
 		playerPosX -= playerSpeed;
@@ -27,7 +28,7 @@ void PlayerConttrol(void)
 		playerPosX += playerSpeed;
 	}
 
-
+	//âÊñ êßå‰
 	if (playerPosX <= 25 - PLAYER_SIZE_X / 2)
 	{
 		playerPosX = 25 - PLAYER_SIZE_X / 2;
@@ -36,7 +37,17 @@ void PlayerConttrol(void)
 	{
 		playerPosX = SCREEN_SIZE_X - PLAYER_SIZE_X ;
 	}
+	//íeÇÃî≠éÀèàóù
+	if (CheckHitKey(KEY_INPUT_LCONTROL))
+	{
+		if (shotFlag == false)
+		{
 
+			shotPosX = playerPosX;
+			shotPosY = playerPosY;
+			shotFlag = true;
+		}
+	}
 }
 void PlayerDraw(void)
 {

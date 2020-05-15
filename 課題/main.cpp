@@ -102,9 +102,10 @@ bool SystemInit(void)
 	//îwåi
 	haikeiImage = LoadGraph("image/haikei.png");
 	//é©ã@
+	enemyImage = LoadGraph("image/enemy.png");
 	
 
-	enemyImage = LoadGraph("image/enemy.png");
+
 	return true;
 
 }
